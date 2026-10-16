@@ -1,161 +1,78 @@
-# Rotaflow
+# Rotaflow Backend API
 
-Rotaflow is a worker scheduling platform that assigns shifts to workers based on a defined business logic.
+> An automated workforce scheduling and shift management REST API engineered with **Node.js**, **Express.js**, **PostgreSQL**, **Docker**, and **Swagger**.
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
-![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
----
-## ✨ Features
-
-- **User Authentication** – secure login & registration with JWT tokens.  
-- **Role Management** – define and manage roles for workers.  
-- **Worker Management** – add, update, and manage worker profiles.  
-- **Automated Scheduling** – generates shifts based on a 4-week cycle  
-  (3 weeks on, 1 week off).  
-- **Printable Schedules** – export and print generated schedules.  
-- **Planned Enhancements**:  
-  - Email notifications (Mailgun)  
-  - WhatsApp notifications (WhatsApp Business API)  
-  - Advanced administrative features and extended scheduling rules  
----
-## 🛠 Tech Stack
-
-- **Backend Framework**: [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/)  
-- **Database**: [PostgreSQL](https://www.postgresql.org/)  
-- **Authentication**: JSON Web Tokens (JWT)  
-- **API Documentation**: [Swagger](https://swagger.io/)  
-- **Deployment**: [Render](https://render.com/) (Node.js service + external PostgreSQL)  
-- **Containerization**: [Docker](https://www.docker.com/) & Docker Compose  
----
-## 🚀 Getting Started
-
-Follow these steps to set up Rotaflow locally.
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v16 or higher recommended)  
-- [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)  
-- [PostgreSQL](https://www.postgresql.org/) (if running without Docker)  
+Rotaflow solves complex shift generation by implementing custom business logic that automates 4-week cyclical rotations (3 weeks active shift work, 1 week rest off) across multi-role workforce teams.
 
 ---
 
-### Installation
+## 🏛️ System Architecture & Domain Design
 
-#### 🔹 Option 1: Run without Docker
+The API is structured with clean separation of concerns across core modules:
+
+| Module | Core Logic & Responsibilities |
+| :--- | :--- |
+| **`Auth & RBAC`** | JWT-based authentication with role-based access control (`ADMIN`, `MANAGER`, `WORKER`). |
+| **`Worker Management`** | Profile management, availability tracking, and role assignment. |
+| **`Scheduler Engine`** | Algorithmic shift generator enforcing cyclical work/rest constraints (3:1 rotation logic). |
+| **`Reporting & Export`** | Printable schedule generation and output formatting. |
+
+---
+
+## 💡 Engineering Highlights
+
+### 1. Algorithmic Shift Generation Engine
+* **Deterministic Rotation Logic:** Computes future shift assignments programmatically across a 28-day sliding cycle, ensuring strict compliance with operational rules (21 days active / 7 days rest).
+* **Conflict Prevention:** Validates worker availability and role dependencies to prevent double-booking or compliance violations.
+
+### 2. Enterprise Integration Readiness
+* **Containerized Workflows:** Fully Dockerized development and production setup with PostgreSQL container orchestration.
+* **OpenAPI Documentation:** Standardized API contracts documented via Swagger UI for front-end and mobile consumption.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Runtime:** Node.js (v18+)
+* **Framework:** Express.js
+* **Database:** PostgreSQL
+* **Authentication:** JSON Web Tokens (JWT) + bcrypt passkey hashing
+* **Documentation:** Swagger / OpenAPI
+* **DevOps & Infrastructure:** Docker, Docker Compose, Render
+
+---
+
+## ⚙️ Quickstart (Docker Setup)
+
+### 1. Clone & Configure
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd rotaflow
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-
-#### 🔹 Option 1: Run with Docker
-# Clone the repository
-git clone <your-repo-url>
-cd rotaflow
-
-# Start services with Docker Compose
-docker-compose up --build
+git clone https://github.com/<your-new-username>/rotaflow-backend.git
+cd rotaflow-backend
+cp .env.example .env
 ```
-----
 
-## 🔑 Environment Variables
-
-Rotaflow uses environment variables for configuration.  
-Create a `.env` file in the project root or update your Docker Compose configuration.  
-
-### Example `.env` file:
-```env
-PORT=5000
-DB_URL=postgres://username:password@localhost:5432/rotaflow
-JWT_SECRET=your_jwt_secret_key
+### 2. Spin Up Containers
+```bash
+docker-compose up --build -d
 ```
----
-## 📖 API Documentation
 
-Rotaflow provides interactive API documentation with **Swagger**.
-
-Once the server is running, you can access it at:  
-👉 `http://localhost:PORT/api-docs`
-
-### Available Endpoints (high-level overview)
-
-- **Auth**  
-  - `POST /api/auth/register` → Register a new user  
-  - `POST /api/auth/login` → Login and receive JWT token  
-
-- **Roles**  
-  - `POST /api/roles` → Create a role  
-  - `GET /api/roles` → Get all roles  
-
-- **Workers**  
-  - `POST /api/workers` → Add a worker  
-  - `GET /api/workers` → Get all workers  
-
-- **Schedules**  
-  - `POST /api/schedules/generate` → Generate worker schedule (3 weeks on, 1 week off)  
-  - `GET /api/schedules` → Retrieve generated schedules  
----
-## ☁️ Deployment
-
-Rotaflow is deployed on [Render](https://render.com/).  
-
-### Setup on Render
-1. Create a **new Web Service** in Render.  
-2. Connect your GitHub repository.  
-3. Choose **Node.js** as the environment.  
-4. Add the required **environment variables** (`PORT`, `DB_URL`, `JWT_SECRET`).  
-5. Deploy the service.  
-
-### Database
-- Use **Render’s managed PostgreSQL instance** or connect an external PostgreSQL database.  
-- Update `DB_URL` in your environment variables with the connection string.  
-
-### Post-deployment
-- Your API will be available at your Render domain, for example:  
-  👉 `https://rotaflow.onrender.com/api`  
-- Swagger docs will be available at:  
-  👉 `https://rotaflow.onrender.com/api-docs`  
----
-## 🗺 Roadmap
-
-Rotaflow is under active development.  
-
-- ✅ Core scheduling logic (3 weeks on, 1 week off)  
-- ✅ User authentication with JWT  
-- ✅ Role & worker management  
-- ✅ Swagger API documentation  
-- ✅ Docker & Docker Compose setup  
-- ✅ Render deployment  
-
-### Upcoming Features
-- 🔜 Email notifications via **Mailgun**  
-- 🔜 WhatsApp notifications via **WhatsApp Business API**  
-- 🔜 Advanced administrative features  
-- 🔜 Extended scheduling rules & customization options  
----
-## 🤝 Contributing
-
-Rotaflow is a **private/internal project**.  
-Contributions are limited to the internal development team.  
-
-If you are part of the team:  
-- Follow the Git workflow (feature branches + pull requests).  
-- Ensure all new code is tested and documented.  
-- Update Swagger docs when adding or modifying endpoints.  
+### 3. API Documentation
+Access the interactive OpenAPI interface at:
+```text
+http://localhost:5000/api-docs
+```
 
 ---
 
-## 📄 License
+## 🧪 Verification & Features Checklist
 
-This project is proprietary and **not open source**.  
-Unauthorized use, distribution, or modification is prohibited.
+- [x] JWT Token Authentication & Protected Route Guards
+- [x] Role-Based Access Control (RBAC)
+- [x] Cyclical Worker Scheduling Algorithm (3 Weeks On / 1 Week Off)
+- [x] Swagger API Documentation
+- [x] Containerized Docker Deployment Setup
 
+---
+
+> *Note 1: Architected and developed as a specialized workforce scheduling service.*
+> *Note 2: This project was originally conceptualized, architected, and migrated from my previous developer profile.*
